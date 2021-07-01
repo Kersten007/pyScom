@@ -1,0 +1,42 @@
+from api import Xcom_API
+#from serial import Serial
+import serial
+
+class xcom232(object):
+    def __init__(self, port='/dev/ttyUSB0', baudrate=115200, timeout=1):      
+        self.port = port
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.uart = serial.Serial(port=self.port, baudrate=self.baudrate, parity= serial.PARITY_EVEN, timeout=self.timeout)
+        self.api = Xcom_API(crc=True, source=1, destination=101)
+
+
+    def __receive(self, data: str):
+        try:
+            self.uart.write(data)
+            #data = uart.read_until(expected=b'\x0D\x0A', size=100)
+            #data = self.uart.read_until(expected=b'\x85Q', size=200)
+            data = self.uart.read(30)
+            #print(len(data))
+            return data
+        except:
+            print ("Error open UART", self.port)
+
+    def read_id(self, id=0):
+        if self.uart.isOpen():
+            self.uart.flushInput()
+            self.uart.flushOutput()
+            result = self.__receive(self.api.get_read_frame(id))
+            return self.api.get_data_from_frame(result)[1]
+        else:
+            return ""
+
+
+    def __del__(self):
+        if self.uart.isOpen():
+            self.uart.close
+        
+
+# \xaace\x00\x00\x00\x01\x00\x00\x00\x0e\x00\xd6J\x02\x01\x01\x00\xc3\x0b\x00\x00\x01\x00\x00\x00rC\x87U
+
+
