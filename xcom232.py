@@ -1,5 +1,4 @@
 from api import Xcom_API
-#from serial import Serial
 import serial
 
 class xcom232(object):
@@ -11,7 +10,7 @@ class xcom232(object):
         self.api = Xcom_API(crc=True, source=1, destination=101)
 
 
-    def __receive(self, data: str):
+    def __transmit(self, data: str):
         try:
             self.uart.write(data)
             #data = uart.read_until(expected=b'\x0D\x0A', size=100)
@@ -20,19 +19,45 @@ class xcom232(object):
             #print(len(data))
             return data
         except:
-            print ("Error open UART", self.port)
+            print ("Error Uart __receive", self.port)
+            raise Exception 
+            return ""
 
-    def read_id(self, id=0):
-        if self.uart.isOpen():
-            self.uart.flushInput()
-            self.uart.flushOutput()
-            result = self.__receive(self.api.get_read_frame(id))
-            return self.api.get_data_from_frame(result)[1]
-        else:
+    def read_id(self, id:int):
+        try:
+            if self.uart.isOpen():
+                self.uart.flushInput()
+                self.uart.flushOutput()
+                result = self.__transmit(self.api.get_read_frame(id))
+                result = self.api.get_data_from_frame(result)
+                if result[0] == True:
+                    return self.api.get_text_from_error_id(result[2]) #vml. besser mit raise Event ?
+                else:
+                    return result[1]
+            else:
+                return ""
+        except:
+            print("Error UART read_id")
+            raise Exception
+            return ""
+
+    def write_id(self, id:int, data):
+        try:
+            if self.uart.isOpen():
+                self.uart.flushInput()
+                self.uart.flushOutput()
+                result = self.__transmit(self.api.get_write_frame(id), data)
+                return self.api.get_data_from_frame(result)[1]
+            else:
+                return ""
+        except:
+            print("Error UART write_id")
+            raise Exception
             return ""
 
 
     def __del__(self):
+        #print("del xcom object")
         if self.uart.isOpen():
             self.uart.close
         

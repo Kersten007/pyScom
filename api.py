@@ -13,6 +13,7 @@
 #                                                             Requirements                                                               #
 ##########################################################################################################################################
 
+from os import name
 import struct
 
 ##########################################################################################################################################
@@ -26,6 +27,7 @@ import struct
 #   This class contains methods to generate read- or write-frames, and methods to decode frames. There are pre-defined types, properties 
 #   and formats for the most important parameter- and information-numbers. This reduces the effort for generating byte-frames, but there 
 #   are extended methods to generate byte-frames with other parameter- and information-numbers.
+
 
 class Xcom_API():
 
@@ -99,8 +101,6 @@ class Xcom_API():
     INFO_STATE_OF_GROUND_RELAY           = 3074
     INFO_STATE_OF_NEUTRAL_TRANSFER_RELAY = 3075
     INFO_STATE_OF_REMOTE_ENTRY           = 3086
-
-    Obj = {"INFO_BATTERY_VOLTAGE" : 3000}
 
     ##################################################################################################################################
     #                                           Protected-Attributes-Parameter-Object_ID                                             #
@@ -200,7 +200,7 @@ class Xcom_API():
 
     #   Dictionary of Parameter-Info-Numbers with type, property and format
 
-    __para_info_dict    =  {INFO_BATTERY_VOLTAGE    :   [_object_type_info,_property_id_value,_format_float],
+    __para_info_dict    =  {INFO_BATTERY_VOLTAGE        :   [_object_type_info,_property_id_value,_format_float] ,
                             INFO_BATTERY_TEMPERATURE    :   [_object_type_info,_property_id_value,_format_float],
                             3005    :   [_object_type_info,_property_id_value,_format_float],
                             3006    :   [_object_type_info,_property_id_value,_format_float],
@@ -236,6 +236,9 @@ class Xcom_API():
                             1128    :   [_object_type_parameter,_property_id_value_qsp,_format_bool],
                             1607    :   [_object_type_parameter,_property_id_value_qsp,_format_float],
                             1545    :   [_object_type_parameter,_property_id_value_qsp,_format_long_enum]}
+
+
+    menno = "Menno"
 
 
     ##################################################################################################################################
@@ -332,6 +335,9 @@ class Xcom_API():
         if hasattr(self,'__frame_check_done'):
             del self.__frame_check_done
         Xcom_API.__object_counter -= 1
+
+
+
 
     ##################################################################################################################################
     #                                                     Information-Methods                                                        #
