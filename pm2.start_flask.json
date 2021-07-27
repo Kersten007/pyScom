@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "hello",
+      "cwd": "/home/data/pyScom",
+      "script": "xtenderweb.py"
+    }
+  ]
+}

@@ -37,7 +37,7 @@ class xcom232(object):
             else:
                 return ""
         except:
-            print("Error UART read_id")
+            print("Error UART read_id : " + str(id) )
             raise Exception
             return ""
 

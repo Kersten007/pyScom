@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      "name": "scomweb",
+      "cwd": "/home/data/pyScom/scomweb",
+      "args": "runserver 127.0.0.1:8000", 
+      "script": "manage.py",
+      "exec_mode": "fork",
+      "exec_interpreter": "python3",
+      "instances": "1" 
+    }
+  ]
+}
