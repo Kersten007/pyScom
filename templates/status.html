@@ -7,24 +7,52 @@
  </head>
  <body>
   <h1>Scom Werte mit flask</h1>
-  <p>Die aktuelle Eingangsspannung ist <span id="u_eingang"></span> V AC</p>
-  <p>ID 3000 <span id="id_3000"></span> V AC</p>
+  <p>Die aktuelle <span id="id3011n"></span> ist <span id="id3011v"></span> <span id="id3011u"></span></p>
+  <p>Der aktuelle <span id="id3022n"></span> ist <span id="id3022v"></span> <span id="id3022u"></span></p>
 
   <script>
-   function update_u_eingang()
+   function update_list()
    {
-      url = "http://fhem.aljam.de:5000/list"
+      //url = "http://fhem-vm.aljam.de:5000/list" //achtung Access-Control-Allow-Origin: setzen ... wo weiß ich nicht
+      url = "/list"
       fetch( url )
          .then( response => {
             if( !response.ok )
                throw new Error( "fetch failed in update_u_eingang() :" + url  ) ;
+            return response.json() ;
+         } )
+         .then( json => {
+               document.querySelector("#id3011v").textContent = json.id3011.value;
+               document.querySelector("#id3011n").textContent = json.id3011.name;
+               document.querySelector("#id3011u").textContent = json.id3011.unit;
+               document.querySelector("#id3022v").textContent = json.id3022.value;
+               document.querySelector("#id3022n").textContent = json.id3022.name;
+               document.querySelector("#id3022u").textContent = json.id3022.unit;
+               //console.log(json.id3011.value);
+            } 
+         )
+
+         .catch((error) => {
+         console.error('Error:', error);
+         });
+   }
+   update_list() ;
+
+
+   function update_u_eingang()
+   {
+      fetch( "/u_eingang" )
+         .then( response => {
+            if( !response.ok )
+               throw new Error( "fetch failed" ) ;
 
             return response.json() ;
          } )
-         .then( json => document.querySelector("#u_eingang").textContent = json.id3011)
+         .then( json => document.querySelector("#u_eingang").textContent = json.u_eingang )
          .catch( error => alert(error) ) ;
    }
-   update_u_eingang() ;
+   //update_u_eingang() ;
+
 
 
    function get_value_by_id(id)
@@ -86,7 +114,8 @@
  
 
 
-   setInterval( update_u_eingang, 5000 ) ;
+   setInterval( update_list, 1000 ) ;
+   //setInterval( update_u_eingang, 3000 ) ;
    //setInterval( update_all, 3000 ) ;
 
   </script>

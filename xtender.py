@@ -4,7 +4,6 @@
 from xcom232 import xcom232
 
 
-
 class xtender_obj:
     def __init__(self, name = "Objekt Name", id = 0, c = type(xcom232)):
         self.name = name
