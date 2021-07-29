@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, send_file, jsonify, request
 import xtender, threading, time
 import json
 
@@ -9,25 +9,33 @@ olist = []
 # id , zeit in s
 class XPollObjekt(object):
     value = 1.0 #Speicher für die geholten werte
-    def __init__(self, id = 0, name = "name", unit = "", refreshtime = 1.0) -> None:
+    def __init__(self, id = 0, name = "name", unit = "", refreshtime = 0.0, a = 1.0) -> None:
         self.id = id
         self.name = name
         self.unit = unit
         self.refreshtime = refreshtime
         self.updatetime = time.time()
-        self.value = 0.0
-
+        self.raw = 0.0
+        self.a = a
+        self.init = True
+    def value (self):
+        return round (self.a * self.raw, 2)
 
 #Liste mit zu pollenden Xtender Objekten
 def init_poll_list(api):
-    olist.append(XPollObjekt(api.INFO_INPUT_VOLTAGE, "Eingangsspannung","V", 5.0))
-    olist.append(XPollObjekt(api.INFO_INPUT_CURRENT, "Eingangsstrom","A", 8.0))
-    olist.append(XPollObjekt(api.INFO_INPUT_POWER,   "Eingangsleistung","W", 10.0))
+    olist.append(XPollObjekt(api.INFO_INPUT_VOLTAGE, "Netz-Eingangsspannung","V", 5.0))
+    olist.append(XPollObjekt(api.INFO_INPUT_CURRENT, "Netz-Eingangsstrom","A", 8.0))
+    olist.append(XPollObjekt(api.INFO_INPUT_POWER,   "Netz-Eingangsleistung","W", 10.0,1000.0))
     olist.append(XPollObjekt(api.INFO_BATTERY_VOLTAGE, "Batteriespannung","V", 10.0))
-    olist.append(XPollObjekt(api.INFO_OUTPUT_POWER, "Ausgangsleistung","W", 5.0))
-    olist.append(XPollObjekt(api.INFO_OUTPUT_CURRENT, "Ausgangsstrom","A", 5.0))
+    olist.append(XPollObjekt(api.INFO_OUTPUT_POWER, "Netz-Ausgangsleistung","W", 5.0, 1000.0))
+    olist.append(XPollObjekt(api.INFO_OUTPUT_CURRENT, "Netz-Ausgangsstrom","A", 5.0))
     olist.append(XPollObjekt(api.INFO_STATE_OF_OUTPUT_RELAY, "Status Ausgangsrelais","on/off", 60.0))
     olist.append(XPollObjekt(api.INFO_STATE_OF_TRANSFER_RELAY, "Status Tranferrelais","on/off", 60.0))
+    olist.append(XPollObjekt(api.INFO_BATTERY_CHARGE_CURRENT, "Batterie Ladestrom","A", 60.0))
+
+
+def init_param_list(api):
+    olist.append(XPollObjekt(api.PARA_BATTERY_CHARGE_CURRENT, "Batterie Ladestrom","A", 0.0))
 
 
 '''
@@ -85,15 +93,21 @@ def init_poll_list(api):
 
 def polling_thead():
     Xtender = xtender.Xtender()
-    init_poll_list(Xtender.api)    
+    init_poll_list(Xtender.api)
+    init_param_list(Xtender.api)
     while (True):
         i = 0
         while  i < len(olist) :
             o = olist[i]
-            if o.updatetime  < time.time():
-                o.updatetime = time.time() + o.refreshtime
-                o.value = Xtender.conn.read_id(o.id)
-                #print(time.time(), o.name, o.refreshtime, o.value , threading.get_ident())
+            if o.updatetime > 0:
+                if o.updatetime  < time.time():
+                    o.updatetime = time.time() + o.refreshtime
+                    o.raw = Xtender.conn.read_id(o.id)
+                    #print(time.time(), o.name, o.refreshtime, o.value , threading.get_ident())
+            else:
+                if o.init == True:
+                    o.raw = Xtender.conn.read_id(o.id)
+                    o.init = False
             i += 1
         time.sleep(0.2)
 
@@ -106,23 +120,36 @@ def before_first_request():
     time.sleep(1)
     print ("Thread gestartet")
 
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/')
 def hello():
-    print ("hello")
-    print(olist)
     return 'Hello, World!'
 
 @app.route('/status') 
 def status():
     return render_template('status.html')
 
+@app.route('/script.js') 
+def script_js():
+    #return send_file('templates/script.js')
+    return render_template('script.js')
+
+'''
+@app.route('/status/<path:path>') 
+def status1(path):
+    return render_template("static", path)
+'''
 
 @app.route('/list') 
 def list():
     b = {}
     for obj in olist:
-        b.update({"id"+str(obj.id) : {"value":obj.value,"name":obj.name,"unit":obj.unit}})
+        b.update({"id"+str(obj.id) : {"value":obj.value(),"name":obj.name,"unit":obj.unit}})
     return jsonify(b)
 
 
@@ -141,7 +168,7 @@ def f_value_by_id():
 
 
 if __name__ == '__main__':
-    app.run(port=5000, host='192.168.123.35', debug=True)
+    app.run(port=80, host='192.168.123.35', debug=True)
     pass
     
 

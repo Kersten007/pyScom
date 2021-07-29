@@ -4,8 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+   <!-- Bootstrap CSS -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+   <script src='script.js'></script>
+
+  <!-- 
+    src="{{ url_for('static', filename='map.js') }}"></script> 
+  -->
 
   <title>Scom Schnittstelle</title>
  </head>
@@ -14,114 +20,16 @@
   <p>Die aktuelle <span id="id3011n"></span> ist <span id="id3011v"></span> <span id="id3011u"></span></p>
   <p>Der aktuelle <span id="id3022n"></span> ist <span id="id3022v"></span> <span id="id3022u"></span></p>
 
-  <script>
-   function update_list()
-   {
-      //url = "http://fhem-vm.aljam.de:5000/list" //achtung Access-Control-Allow-Origin: setzen ... wo weiß ich nicht
-      url = "/list"
-      fetch( url )
-         .then( response => {
-            if( !response.ok )
-               throw new Error( "fetch failed in update_u_eingang() :" + url  ) ;
-            return response.json() ;
-         } )
-         .then( json => {
-               document.querySelector("#id3011v").textContent = json.id3011.value;
-               document.querySelector("#id3011n").textContent = json.id3011.name;
-               document.querySelector("#id3011u").textContent = json.id3011.unit;
-               document.querySelector("#id3022v").textContent = json.id3022.value;
-               document.querySelector("#id3022n").textContent = json.id3022.name;
-               document.querySelector("#id3022u").textContent = json.id3022.unit;
-               //console.log(json.id3011.value);
-            } 
-         )
-
-         .catch((error) => {
-         console.error('Error:', error);
-         });
-   }
-   update_list() ;
 
 
-   function update_u_eingang()
-   {
-      fetch( "/u_eingang" )
-         .then( response => {
-            if( !response.ok )
-               throw new Error( "fetch failed" ) ;
+   <button type="button" id="button1"  class="btn btn-primary">Primary</button>
+   <button type="button" class="btn btn-secondary">Secondary</button>
+   <button type="button" class="btn btn-success">Success</button>
+   <button type="button" class="btn btn-danger">Danger</button>
+   <button type="button" class="btn btn-warning">Warning</button>
+   <button type="button" class="btn btn-info">Info</button>
+   <button type="button" class="btn btn-light">Light</button>
+   <button type="button" class="btn btn-dark">Dark</button>
 
-            return response.json() ;
-         } )
-         .then( json => document.querySelector("#u_eingang").textContent = json.u_eingang )
-         .catch( error => alert(error) ) ;
-   }
-   //update_u_eingang() ;
-
-
-
-   function get_value_by_id(id)
-   {
-      //fetch( "/value_by_id?id=" + id.toString())
-      //url = "/value_by_id"
-      //fetch(url, params = {id:3005})
-      //url = "/value_by_id"
-      var url = new URL("http://fhem.aljam.de:5000/value_by_id"), params = {id:3000}
-      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
-      fetch(url)
-         .then( response => 
-         {
-            if( !response.ok )
-               throw new Error( "fetch failed in get_value_by_id() : " + url ) ;
-
-            return response.json() ;
-         } )
-         .then( json => document.querySelector("#id_" + id.toString()).textContent = json.value_by_id )
-         .catch( error => alert(error) ) ;
-   }
-
-
-   function get_value_by_id1(id)
-   {
-      //fetch( "/value_by_id?id=" + id.toString())
-
-
-      const url = '/value_by_id';
-
-      let data = {
-         id: '3000'
-      }
-
-      var request = new Request(url, {
-         method: 'POST',
-         body: data,
-         headers: new Headers()
-      });
-
-      fetch(url)
-         .then( response => 
-         {
-            if( !response.ok )
-               throw new Error( "fetch failed in get_value_by_id() : " + url ) ;
-
-            return response.json() ;
-         } )
-         .then( json => document.querySelector("#id_" + id.toString()).textContent = json.value_by_id )
-         .catch( error => alert(error) ) ;
-   }
-
-
-   function update_all()
-   {
-      get_value_by_id(3000);
-   }
-   //update_all();
- 
-
-
-   setInterval( update_list, 5000 ) ;
-   //setInterval( update_u_eingang, 3000 ) ;
-   //setInterval( update_all, 3000 ) ;
-
-  </script>
  </body>
 </html>
